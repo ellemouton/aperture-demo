@@ -40,6 +40,19 @@ func main() {
 				},
 			},
 		},
+		{
+			Name:   "addquote",
+			Usage:  "add a quote to the content delivery system",
+			Action: addQuote,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name: "author",
+				},
+				cli.StringFlag{
+					Name: "content",
+				},
+			},
+		},
 	}
 
 	err := app.Run(os.Args)
@@ -96,5 +109,36 @@ func addBook(ctx *cli.Context) error {
 	}
 
 	fmt.Printf("Success! New article id is: %d\n", resp.Id)
+	return nil
+}
+
+func addQuote(ctx *cli.Context) error {
+	client, cleanup, err := getClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer cleanup()
+
+	author := ctx.String("author")
+	if author == "" {
+		return fmt.Errorf("must set a author for the quote")
+	}
+
+	content := ctx.String("content")
+	if content == "" {
+		return fmt.Errorf("must set content for the quote")
+	}
+
+	resp, err := client.AddQuote(context.Background(),
+		&contentrpc.AddQuoteRequest{
+			Author:  author,
+			Content: content,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Success! New quote id is: %d\n", resp.Id)
 	return nil
 }

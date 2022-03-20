@@ -16,6 +16,7 @@ type DB struct {
 
 type content struct {
 	Articles []*Article `json:"articles"`
+	Quotes   []*Quote   `json:"quotes"`
 }
 
 func NewDB() (*DB, error) {
@@ -84,4 +85,22 @@ func (d *DB) GetArticle(id int) (*Article, error) {
 	}
 
 	return d.content.Articles[id-1], nil
+}
+
+func (d *DB) AddQuote(quote *Quote) (int, error) {
+	d.content.Quotes = append(d.content.Quotes, quote)
+
+	if err := d.writeContent(); err != nil {
+		return 0, err
+	}
+
+	return len(d.content.Quotes), nil
+}
+
+func (d *DB) GetQuote(id int) (*Quote, error) {
+	if len(d.content.Quotes) < id || id <= 0 {
+		return nil, fmt.Errorf("no quote with id %d", id)
+	}
+
+	return d.content.Quotes[id-1], nil
 }

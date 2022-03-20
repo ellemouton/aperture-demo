@@ -52,7 +52,8 @@ func (s *Server) Start() error {
 	// Start the http server that listens for content requests.
 	r := mux.NewRouter()
 	r.HandleFunc("/test", freebeeHandler).Methods("GET")
-	r.HandleFunc("/book/{id}", s.bookHandler).Methods("GET")
+	r.HandleFunc("/article/{id}", s.articleHandler).Methods("GET")
+	r.HandleFunc("/quote/{id}", s.quoteHandler).Methods("GET")
 
 	log.Printf("Serving HTTP server on port %s", "localhost:9000")
 	go func() {
@@ -87,11 +88,25 @@ func (s *Server) AddArticle(_ context.Context,
 	return &pb.AddArticleResponse{Id: int64(id)}, nil
 }
 
+func (s *Server) AddQuote(_ context.Context,
+	req *pb.AddQuoteRequest) (*pb.AddQuoteResponse, error) {
+
+	id, err := s.DB.AddQuote(&db.Quote{
+		Author:  req.Author,
+		Content: req.Content,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.AddQuoteResponse{Id: int64(id)}, nil
+}
+
 func freebeeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Freebee endpoint test")
 }
 
-func (s *Server) bookHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) articleHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.ParseInt(vars["id"], 10, 64)
 	if err != nil {
@@ -105,7 +120,28 @@ func (s *Server) bookHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := fmt.Sprintf("Title: %s\nAuthor: %s\nContent: %s\n", article.Title, article.Author, article.Content)
+	resp := fmt.Sprintf("Title: %s\nAuthor: %s\nContent: %s\n",
+		article.Title, article.Author, article.Content)
+
+	fmt.Fprintln(w, resp)
+}
+
+func (s *Server) quoteHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.ParseInt(vars["id"], 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	quote, err := s.DB.GetQuote(int(id))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	resp := fmt.Sprintf("Quote Author: %s\nContent: %s\n", quote.Author,
+		quote.Content)
 
 	fmt.Fprintln(w, resp)
 }
