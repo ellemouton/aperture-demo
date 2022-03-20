@@ -1,0 +1,17 @@
+syntax="proto3";
+
+package contentrpc;
+
+option go_package = "./contentrpc";
+
+service Content {
+        rpc AddArticle(AddArticleRequest) returns (AddArticleResponse);
+}
+
+message AddArticleRequest {
+        string title = 1;
+        string author = 2;
+        string content = 3;
+}
+
+message AddArticleResponse {}
