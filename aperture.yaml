@@ -1,0 +1,49 @@
+# The address which the proxy can be reached at.
+listenaddr: "localhost:8700"
+
+# Should the static file server be enabled that serves files from the directory
+# specified in `staticroot`?
+servestatic: false
+
+# The log level that should be used for the proxy.
+#
+# Valid options include: trace, debug, info, warn, error, critical, off.
+debuglevel: "debug"
+
+servername: localhost
+
+# Settings for the lnd node used to generate payment requests. All of these
+# options are required.
+authenticator:
+  lndhost: "localhost:10013"
+  tlspath: "/Users/elle/LL/dev-resources/docker-regtest/mounts/regtest/charlie/tls.cert"
+  macdir: "/Users/elle/LL/dev-resources/docker-regtest/mounts/regtest/charlie"
+  network: "regtest"
+
+# Settings for the etcd instance which the proxy will use to reliably store and
+# retrieve token information.
+etcd:
+  host: "localhost:2379"
+
+# List of services that should be reachable behind the proxy.  Requests will be
+# matched to the services in order, picking the first that satisfies hostregexp
+# and (if set) pathregexp. So order is important!
+#
+# Use single quotes for regular expressions with special characters in them to
+# avoid YAML parsing errors!
+services:
+  - name: "articles"
+    hostregexp: '^localhost:8700$'
+    pathregexp: '^/article.*'
+    address: "127.0.0.1:9000"
+    protocol: http
+    capabilities: "add,subtract"
+    price: 10
+
+  - name: "quotes"
+    hostregexp: '^localhost:8700$'
+    pathregexp: '^/quote.*'
+    address: "127.0.0.1:9000"
+    protocol: http
+    capabilities: "add,subtract"
+    price: 20
