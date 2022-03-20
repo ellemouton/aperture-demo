@@ -68,10 +68,14 @@ func (d *DB) writeContent() error {
 	return ioutil.WriteFile(dbName, b, 0644)
 }
 
-func (d *DB) AddArticle(article *Article) error {
+func (d *DB) AddArticle(article *Article) (int, error) {
 	d.content.Articles = append(d.content.Articles, article)
 
-	return d.writeContent()
+	if err := d.writeContent(); err != nil {
+		return 0, err
+	}
+
+	return len(d.content.Articles), nil
 }
 
 func (d *DB) GetArticle(id int) (*Article, error) {

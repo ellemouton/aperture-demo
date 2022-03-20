@@ -75,7 +75,7 @@ var _ pb.ContentServer = (*Server)(nil)
 func (s *Server) AddArticle(_ context.Context,
 	req *pb.AddArticleRequest) (*pb.AddArticleResponse, error) {
 
-	err := s.DB.AddArticle(&db.Article{
+	id, err := s.DB.AddArticle(&db.Article{
 		Title:   req.Title,
 		Author:  req.Author,
 		Content: req.Content,
@@ -84,7 +84,7 @@ func (s *Server) AddArticle(_ context.Context,
 		return nil, err
 	}
 
-	return &pb.AddArticleResponse{}, nil
+	return &pb.AddArticleResponse{Id: int64(id)}, nil
 }
 
 func freebeeHandler(w http.ResponseWriter, r *http.Request) {

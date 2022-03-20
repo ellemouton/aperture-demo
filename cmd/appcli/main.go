@@ -84,7 +84,7 @@ func addBook(ctx *cli.Context) error {
 		return fmt.Errorf("must set content for the book")
 	}
 
-	_, err = client.AddArticle(context.Background(),
+	resp, err := client.AddArticle(context.Background(),
 		&contentrpc.AddArticleRequest{
 			Title:   title,
 			Author:  author,
@@ -95,6 +95,6 @@ func addBook(ctx *cli.Context) error {
 		return err
 	}
 
-	fmt.Println("Success!")
+	fmt.Printf("Success! New article id is: %d\n", resp.Id)
 	return nil
 }
