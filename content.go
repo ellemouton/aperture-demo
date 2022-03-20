@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
+	"strconv"
 
 	pb "github.com/ellemouton/aperture-demo/contentrpc"
 	"github.com/ellemouton/aperture-demo/db"
+	"github.com/gorilla/mux"
 	"google.golang.org/grpc"
 )
 
@@ -35,14 +38,26 @@ func (s *Server) Start() error {
 		return err
 	}
 
+	// Start the Content gRPC server.
 	s.contentServer = grpc.NewServer()
-
 	pb.RegisterContentServer(s.contentServer, s)
 
 	log.Printf("Content Server serving at %s", "localhost:8080")
 	go func() {
 		if err := s.contentServer.Serve(lis); err != nil {
 			fmt.Printf("error starting content server: %v\n", err)
+		}
+	}()
+
+	// Start the http server that listens for content requests.
+	r := mux.NewRouter()
+	r.HandleFunc("/test", freebeeHandler).Methods("GET")
+	r.HandleFunc("/book/{id}", s.bookHandler).Methods("GET")
+
+	log.Printf("Serving HTTP server on port %s", "localhost:9000")
+	go func() {
+		if err := http.ListenAndServe("localhost:9000", r); err != nil {
+			fmt.Printf("error starting http server: %v\n", err)
 		}
 	}()
 
@@ -70,4 +85,27 @@ func (s *Server) AddArticle(_ context.Context,
 	}
 
 	return &pb.AddArticleResponse{}, nil
+}
+
+func freebeeHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Freebee endpoint test")
+}
+
+func (s *Server) bookHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.ParseInt(vars["id"], 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	article, err := s.DB.GetArticle(int(id))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	resp := fmt.Sprintf("Title: %s\nAuthor: %s\nContent: %s\n", article.Title, article.Author, article.Content)
+
+	fmt.Fprintln(w, resp)
 }
