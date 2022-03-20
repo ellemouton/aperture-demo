@@ -20,8 +20,9 @@ message AddArticleResponse {
 }
 
 message AddQuoteRequest {
-        string author = 2;
-        string content = 3;
+        string author = 1;
+        string content = 2;
+        int64 price = 3;
 }
 
 message AddQuoteResponse {

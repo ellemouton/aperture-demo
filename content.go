@@ -11,6 +11,7 @@ import (
 	pb "github.com/ellemouton/aperture-demo/contentrpc"
 	"github.com/ellemouton/aperture-demo/db"
 	"github.com/gorilla/mux"
+	pricespb "github.com/lightninglabs/aperture/pricesrpc"
 	"google.golang.org/grpc"
 )
 
@@ -19,6 +20,8 @@ type Server struct {
 
 	*pb.UnimplementedContentServer
 	contentServer *grpc.Server
+
+	pricesServer *grpc.Server
 }
 
 func NewServer() (*Server, error) {
@@ -33,18 +36,34 @@ func NewServer() (*Server, error) {
 }
 
 func (s *Server) Start() error {
+	// Start the Content gRPC server.
+	s.contentServer = grpc.NewServer()
+	pb.RegisterContentServer(s.contentServer, s)
+
 	lis, err := net.Listen("tcp", "localhost:8080")
 	if err != nil {
 		return err
 	}
 
-	// Start the Content gRPC server.
-	s.contentServer = grpc.NewServer()
-	pb.RegisterContentServer(s.contentServer, s)
-
 	log.Printf("Content Server serving at %s", "localhost:8080")
 	go func() {
 		if err := s.contentServer.Serve(lis); err != nil {
+			fmt.Printf("error starting content server: %v\n", err)
+		}
+	}()
+
+	// Start the Content gRPC server.
+	s.pricesServer = grpc.NewServer()
+	pricespb.RegisterPricesServer(s.pricesServer, s)
+
+	lis2, err := net.Listen("tcp", "localhost:8083")
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Prices Server serving at %s", "localhost:8083")
+	go func() {
+		if err := s.pricesServer.Serve(lis2); err != nil {
 			fmt.Printf("error starting content server: %v\n", err)
 		}
 	}()
@@ -94,6 +113,7 @@ func (s *Server) AddQuote(_ context.Context,
 	id, err := s.DB.AddQuote(&db.Quote{
 		Author:  req.Author,
 		Content: req.Content,
+		Price:   req.Price,
 	})
 	if err != nil {
 		return nil, err
@@ -140,8 +160,8 @@ func (s *Server) quoteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := fmt.Sprintf("Quote Author: %s\nContent: %s\n", quote.Author,
-		quote.Content)
+	resp := fmt.Sprintf("Quote Author: %s\nContent: %s\nPrice: %d\n",
+		quote.Author, quote.Content, quote.Price)
 
 	fmt.Fprintln(w, resp)
 }

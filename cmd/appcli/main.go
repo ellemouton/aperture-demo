@@ -51,6 +51,9 @@ func main() {
 				cli.StringFlag{
 					Name: "content",
 				},
+				cli.Int64Flag{
+					Name: "price",
+				},
 			},
 		},
 	}
@@ -129,10 +132,16 @@ func addQuote(ctx *cli.Context) error {
 		return fmt.Errorf("must set content for the quote")
 	}
 
+	price := ctx.Int64("price")
+	if price < 0 {
+		return fmt.Errorf("cant have a negative price")
+	}
+
 	resp, err := client.AddQuote(context.Background(),
 		&contentrpc.AddQuoteRequest{
 			Author:  author,
 			Content: content,
+			Price:   price,
 		},
 	)
 	if err != nil {

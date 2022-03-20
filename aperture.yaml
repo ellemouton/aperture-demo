@@ -46,4 +46,7 @@ services:
     address: "127.0.0.1:9000"
     protocol: http
     capabilities: "add,subtract"
-    price: 20
+    dynamicprice:
+      enabled: true
+      grpcaddress: 127.0.0.1:8083
+      insecure: true
