@@ -1,10 +1,23 @@
 # Aperture Dynamic Price Demo
 
+### Install the app:
+`make install`
+
+### CLI commands:
+
+Add an article:
+
+`appcli addarticle --title="The Blocksize War" --author="Jonathan Bier" --content="All the Bitcoin gossip"`
+
+
+Add a quote:
+
+`appcli addquote --author="Shakespeare" --content="To be or not to be? That is the question"`
+
+
 ### TODO:
 
 - dockerize the proto generation process. Need go plugins and then run the
   following:    
         `protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative contentrpc/content.proto``
-
-- make file
 
