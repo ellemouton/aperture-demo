@@ -1,5 +1,9 @@
 # Aperture Dynamic Price Demo
 
+### Video Tutorial:
+
+https://www.youtube.com/watch?v=Y2ZG-qcw7Sw
+
 ### Install the app:
 `make install`
 
