@@ -25,9 +25,9 @@ func main() {
 	}
 	app.Commands = []cli.Command{
 		{
-			Name:   "addbook",
-			Usage:  "add a book to the content delivery system",
-			Action: addBook,
+			Name:   "addarticle",
+			Usage:  "add a article to the content delivery system",
+			Action: addArticle,
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name: "title",
@@ -75,7 +75,7 @@ func getClient(ctx *cli.Context) (contentrpc.ContentClient, func(), error) {
 	return sessionsClient, cleanup, nil
 }
 
-func addBook(ctx *cli.Context) error {
+func addArticle(ctx *cli.Context) error {
 	client, cleanup, err := getClient(ctx)
 	if err != nil {
 		return err
@@ -84,17 +84,17 @@ func addBook(ctx *cli.Context) error {
 
 	title := ctx.String("title")
 	if title == "" {
-		return fmt.Errorf("must set a title for the book")
+		return fmt.Errorf("must set a title for the article")
 	}
 
 	author := ctx.String("author")
 	if author == "" {
-		return fmt.Errorf("must set a author for the book")
+		return fmt.Errorf("must set a author for the article")
 	}
 
 	content := ctx.String("content")
 	if content == "" {
-		return fmt.Errorf("must set content for the book")
+		return fmt.Errorf("must set content for the article")
 	}
 
 	resp, err := client.AddArticle(context.Background(),
