@@ -3,6 +3,17 @@
 ### Install the app:
 `make install`
 
+### Diagrams:
+*Basic App*
+![](./images/app.jpg?raw=true "Basic App")
+
+*Static Prices*
+![](./images/aperture-static-prices.jpg?raw=true "Static Prices")
+
+*Dynamic Prices*
+![](./images/aperture-dynamic-prices.jpg?raw=true "Static Prices")
+
+
 ### CLI commands:
 
 Add an article:
