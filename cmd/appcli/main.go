@@ -65,7 +65,7 @@ func main() {
 					Name: "name",
 				},
 				cli.StringFlag{
-					Name: "image-file",
+					Name: "image_file",
 				},
 				cli.Int64Flag{
 					Name: "price",
@@ -180,7 +180,7 @@ func addMeme(ctx *cli.Context) error {
 		return fmt.Errorf("must set a name for the meme")
 	}
 
-	content := ctx.String("image-file")
+	content := ctx.String("image_file")
 	if content == "" {
 		return fmt.Errorf("must give the name of the image file for the meme")
 	}
@@ -191,10 +191,10 @@ func addMeme(ctx *cli.Context) error {
 	}
 
 	resp, err := client.AddMeme(context.Background(),
-		&contentrpc.AddQuoteRequest{
-			Author:  author,
-			Content: content,
-			Price:   price,
+		&contentrpc.AddMemeRequest{
+			Name:  name,
+			Image: image_file,
+			Price: price,
 		},
 	)
 	if err != nil {

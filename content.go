@@ -73,6 +73,7 @@ func (s *Server) Start() error {
 	r.HandleFunc("/test", freebeeHandler).Methods("GET")
 	r.HandleFunc("/article/{id}", s.articleHandler).Methods("GET")
 	r.HandleFunc("/quote/{id}", s.quoteHandler).Methods("GET")
+	r.HandleFunc("/meme/{id}", s.memeHandler).Methods("GET")
 
 	log.Printf("Serving HTTP server on port %s", "localhost:9000")
 	go func() {
@@ -162,6 +163,26 @@ func (s *Server) quoteHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp := fmt.Sprintf("Quote Author: %s\nContent: %s\nPrice: %d\n",
 		quote.Author, quote.Content, quote.Price)
+
+	fmt.Fprintln(w, resp)
+}
+
+func (s *Server) memeHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.ParseInt(vars["id"], 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	meme, err := s.DB.GetMeme(int(id))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	resp := fmt.Sprintf("Meme Name: %s\nImage: %s\nPrice: %d\n",
+		quote.Name, quote.Image, quote.Price)
 
 	fmt.Fprintln(w, resp)
 }
