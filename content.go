@@ -123,6 +123,21 @@ func (s *Server) AddQuote(_ context.Context,
 	return &pb.AddQuoteResponse{Id: int64(id)}, nil
 }
 
+func (s *Server) AddMeme(_ context.Context,
+	req *pb.AddMemeRequest) (*pb.AddMemeResponse, error) {
+
+	id, err := s.DB.AddMeme(&db.Meme{
+		Name:    req.Name,
+		Image:   req.Image,
+		Price:   req.Price,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.AddMemeResponse{Id: int64(id)}, nil
+}
+
 func freebeeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Freebee endpoint test")
 }
@@ -182,7 +197,7 @@ func (s *Server) memeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := fmt.Sprintf("Meme Name: %s\nImage: %s\nPrice: %d\n",
-		quote.Name, quote.Image, quote.Price)
+		meme.Name, meme.Image, meme.Price)
 
 	fmt.Fprintln(w, resp)
 }

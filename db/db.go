@@ -106,7 +106,7 @@ func (d *DB) GetQuote(id int) (*Quote, error) {
 	return d.content.Quotes[id-1], nil
 }
 
-func (d *DB) AddMeme(quote *Meme) (int, error) {
+func (d *DB) AddMeme(meme *Meme) (int, error) {
 	d.content.Memes = append(d.content.Memes, meme)
 
 	if err := d.writeContent(); err != nil {

@@ -32,7 +32,7 @@ message AddQuoteResponse {
 
 message AddMemeRequest {
         string name = 1;
-        string image_file = 2;
+        string image = 2;
         int64 price = 3;
 }
 
