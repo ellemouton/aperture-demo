@@ -17,6 +17,7 @@ type DB struct {
 type content struct {
 	Articles []*Article `json:"articles"`
 	Quotes   []*Quote   `json:"quotes"`
+	Memes    []*Meme    `json:"memes"`
 }
 
 func NewDB() (*DB, error) {
@@ -103,4 +104,22 @@ func (d *DB) GetQuote(id int) (*Quote, error) {
 	}
 
 	return d.content.Quotes[id-1], nil
+}
+
+func (d *DB) AddMeme(meme *Meme) (int, error) {
+	d.content.Memes = append(d.content.Memes, meme)
+
+	if err := d.writeContent(); err != nil {
+		return 0, err
+	}
+
+	return len(d.content.Memes), nil
+}
+
+func (d *DB) GetMeme(id int) (*Meme, error) {
+	if len(d.content.Memes) < id || id <= 0 {
+		return nil, fmt.Errorf("no meme with id %d", id)
+	}
+
+	return d.content.Memes[id-1], nil
 }

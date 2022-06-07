@@ -56,6 +56,22 @@ func main() {
 				},
 			},
 		},
+		{
+			Name:   "addmeme",
+			Usage:  "add a meme to the content delivery system",
+			Action: addMeme,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name: "name",
+				},
+				cli.StringFlag{
+					Name: "image",
+				},
+				cli.Int64Flag{
+					Name: "price",
+				},
+			},
+		},
 	}
 
 	err := app.Run(os.Args)
@@ -149,5 +165,42 @@ func addQuote(ctx *cli.Context) error {
 	}
 
 	fmt.Printf("Success! New quote id is: %d\n", resp.Id)
+	return nil
+}
+
+func addMeme(ctx *cli.Context) error {
+	client, cleanup, err := getClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer cleanup()
+
+	name := ctx.String("name")
+	if name == "" {
+		return fmt.Errorf("must set a name for the meme")
+	}
+
+	image := ctx.String("image")
+	if image == "" {
+		return fmt.Errorf("must give the name of the image file for the meme")
+	}
+
+	price := ctx.Int64("price")
+	if price < 0 {
+		return fmt.Errorf("cant have a negative price")
+	}
+
+	resp, err := client.AddMeme(context.Background(),
+		&contentrpc.AddMemeRequest{
+			Name:  name,
+			Image: image,
+			Price: price,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Success! New meme id is: %d\n", resp.Id)
 	return nil
 }

@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type ContentClient interface {
 	AddArticle(ctx context.Context, in *AddArticleRequest, opts ...grpc.CallOption) (*AddArticleResponse, error)
 	AddQuote(ctx context.Context, in *AddQuoteRequest, opts ...grpc.CallOption) (*AddQuoteResponse, error)
+	AddMeme(ctx context.Context, in *AddMemeRequest, opts ...grpc.CallOption) (*AddMemeResponse, error)
 }
 
 type contentClient struct {
@@ -48,12 +49,22 @@ func (c *contentClient) AddQuote(ctx context.Context, in *AddQuoteRequest, opts 
 	return out, nil
 }
 
+func (c *contentClient) AddMeme(ctx context.Context, in *AddMemeRequest, opts ...grpc.CallOption) (*AddMemeResponse, error) {
+	out := new(AddMemeResponse)
+	err := c.cc.Invoke(ctx, "/contentrpc.Content/AddMeme", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ContentServer is the server API for Content service.
 // All implementations must embed UnimplementedContentServer
 // for forward compatibility
 type ContentServer interface {
 	AddArticle(context.Context, *AddArticleRequest) (*AddArticleResponse, error)
 	AddQuote(context.Context, *AddQuoteRequest) (*AddQuoteResponse, error)
+	AddMeme(context.Context, *AddMemeRequest) (*AddMemeResponse, error)
 	mustEmbedUnimplementedContentServer()
 }
 
@@ -66,6 +77,9 @@ func (UnimplementedContentServer) AddArticle(context.Context, *AddArticleRequest
 }
 func (UnimplementedContentServer) AddQuote(context.Context, *AddQuoteRequest) (*AddQuoteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddQuote not implemented")
+}
+func (UnimplementedContentServer) AddMeme(context.Context, *AddMemeRequest) (*AddMemeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddMeme not implemented")
 }
 func (UnimplementedContentServer) mustEmbedUnimplementedContentServer() {}
 
@@ -116,6 +130,24 @@ func _Content_AddQuote_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Content_AddMeme_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddMemeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ContentServer).AddMeme(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/contentrpc.Content/AddMeme",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ContentServer).AddMeme(ctx, req.(*AddMemeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Content_ServiceDesc is the grpc.ServiceDesc for Content service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -130,6 +162,10 @@ var Content_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddQuote",
 			Handler:    _Content_AddQuote_Handler,
+		},
+		{
+			MethodName: "AddMeme",
+			Handler:    _Content_AddMeme_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

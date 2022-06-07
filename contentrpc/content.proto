@@ -7,6 +7,7 @@ option go_package = "./contentrpc";
 service Content {
         rpc AddArticle(AddArticleRequest) returns (AddArticleResponse);
         rpc AddQuote(AddQuoteRequest) returns (AddQuoteResponse);
+        rpc AddMeme(AddMemeRequest) returns (AddMemeResponse);
 }
 
 message AddArticleRequest {
@@ -26,5 +27,15 @@ message AddQuoteRequest {
 }
 
 message AddQuoteResponse {
+        int64 id = 1;
+}
+
+message AddMemeRequest {
+        string name = 1;
+        string image = 2;
+        int64 price = 3;
+}
+
+message AddMemeResponse {
         int64 id = 1;
 }
