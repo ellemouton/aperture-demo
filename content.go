@@ -6,6 +6,8 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	pb "github.com/ellemouton/aperture-demo/contentrpc"
@@ -22,6 +24,7 @@ type Server struct {
 	contentServer *grpc.Server
 
 	pricesServer *grpc.Server
+	homeDir      string
 }
 
 func NewServer() (*Server, error) {
@@ -30,8 +33,14 @@ func NewServer() (*Server, error) {
 		return nil, err
 	}
 
+	dir, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Server{
-		DB: db,
+		DB:      db,
+		homeDir: dir,
 	}, nil
 }
 
@@ -74,6 +83,7 @@ func (s *Server) Start() error {
 	r.HandleFunc("/article/{id}", s.articleHandler).Methods("GET")
 	r.HandleFunc("/quote/{id}", s.quoteHandler).Methods("GET")
 	r.HandleFunc("/meme/{id}", s.memeHandler).Methods("GET")
+	r.HandleFunc("/meme/show/{id}", s.memeImageHandler).Methods("GET")
 
 	log.Printf("Serving HTTP server on port %s", "localhost:9000")
 	go func() {
@@ -127,9 +137,9 @@ func (s *Server) AddMeme(_ context.Context,
 	req *pb.AddMemeRequest) (*pb.AddMemeResponse, error) {
 
 	id, err := s.DB.AddMeme(&db.Meme{
-		Name:    req.Name,
-		Image:   req.Image,
-		Price:   req.Price,
+		Name:  req.Name,
+		Image: req.Image,
+		Price: req.Price,
 	})
 	if err != nil {
 		return nil, err
@@ -200,4 +210,22 @@ func (s *Server) memeHandler(w http.ResponseWriter, r *http.Request) {
 		meme.Name, meme.Image, meme.Price)
 
 	fmt.Fprintln(w, resp)
+}
+
+func (s *Server) memeImageHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.ParseInt(vars["id"], 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	meme, err := s.DB.GetMeme(int(id))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	imagePath := filepath.Join(s.homeDir, "images", meme.Image)
+	http.ServeFile(w, r, imagePath)
 }
